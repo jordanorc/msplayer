@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
@@ -37,6 +38,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jna.platform.WindowUtils;
 
+import br.ufes.inf.lprm.msplayer.audio.PlayerAudioInfoPanel;
+import br.ufes.inf.lprm.msplayer.audio.SingleWaveformPanel;
+import br.ufes.inf.lprm.msplayer.audio.WaveformPanelContainer;
 import uk.co.caprica.vlcj.binding.LibVlc;
 import uk.co.caprica.vlcj.binding.LibVlcFactory;
 import uk.co.caprica.vlcj.binding.internal.libvlc_media_t;
@@ -77,7 +81,7 @@ public class PlayerVideo extends JPanel {
 		videoSurface = new Canvas();
 
 		videoSurface.setBackground(Color.black);
-		videoSurface.setSize(800, 500); // Only for initial layout
+		videoSurface.setSize(800, 300); // Only for initial layout
 
 		// Since we're mixing lightweight Swing components and heavyweight AWT
 		// components this is probably a good idea
@@ -131,13 +135,21 @@ public class PlayerVideo extends JPanel {
 		controlsPanel = new PlayerVideoControlsPanel(mediaPlayer);
 		videoAdjustPanel = new JPanel();
 		videoAdjustPanel.setLayout(new BoxLayout(videoAdjustPanel, BoxLayout.Y_AXIS));
+		//videoAdjustPanel.setLayout(new BoxLayout(videoAdjustPanel, BoxLayout.Y_AXIS));
 		videoAdjustPanel.add(new PlayerVideoAdjustPanel(mediaPlayer));
+		videoAdjustPanel.add(new PlayerAudioInfoPanel(mediaPlayer));
 		videoAdjustPanel.add(new PlayerVideoInfoPanel(mediaPlayer));
 
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		mainPanel.add(videoSurface);
 		mainPanel.add(new PlayerVideoFramePanel(mediaPlayer));
+		mainPanel.add(new WaveformPanelContainer(mediaPlayer));
+		
+		//mainPanel.setLayout(new MigLayout());
+		//mainPanel.add(videoSurface, "width max(100%, 100%), wrap 3");
+		//mainPanel.add(new PlayerVideoFramePanel(mediaPlayer), "width max(100%, 100%), wrap");
+		//mainPanel.add(new WaveformPanelContainer(mediaPlayer), "width max(100%, 100%), wrap");
 
 		this.setLayout(new BorderLayout());
 		this.setBackground(Color.black);
@@ -322,13 +334,13 @@ public class PlayerVideo extends JPanel {
 			}
 
 			// Demo the marquee
-			mediaPlayer.setMarqueeText("vlcj java bindings for vlc");
+			/*mediaPlayer.setMarqueeText("vlcj java bindings for vlc");
 			mediaPlayer.setMarqueeSize(40);
 			mediaPlayer.setMarqueeOpacity(95);
 			mediaPlayer.setMarqueeColour(Color.white);
 			mediaPlayer.setMarqueeTimeout(5000);
 			mediaPlayer.setMarqueeLocation(50, 120);
-			mediaPlayer.enableMarquee(true);
+			mediaPlayer.enableMarquee(true);*/
 
 			// Not quite sure how crop geometry is supposed to work...
 			//

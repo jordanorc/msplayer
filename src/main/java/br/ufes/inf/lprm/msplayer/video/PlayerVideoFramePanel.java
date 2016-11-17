@@ -109,7 +109,7 @@ public class PlayerVideoFramePanel extends JScrollPane {
 		panelKeyFrames.add(panelLoading);
 
 		Dimension d = getPreferredSize();
-		d.height = 150;
+		d.height = 200;
 		setPreferredSize(d);
 
 		setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);

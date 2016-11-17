@@ -2,12 +2,23 @@ package br.ufes.inf.lprm.msplayer.image;
 
 import java.io.File;
 import java.io.IOException;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
 public class RGBConverter{
 	
+	public static BufferedImage copyImage(BufferedImage source){
+	    BufferedImage b = new BufferedImage(source.getWidth(), source.getHeight(), source.getType());
+	    Graphics g = b.getGraphics();
+	    g.drawImage(source, 0, 0, null);
+	    g.dispose();
+	    return b;
+	}
+	
 	public static BufferedImage to(BufferedImage image, RGB rgb) {
+		BufferedImage rgbImage = copyImage(image);
+		
         //get width and height
         int width = image.getWidth();
         int height = image.getHeight();
@@ -16,10 +27,10 @@ public class RGBConverter{
         for(int y = 0; y < height; y++){
             for(int x = 0; x < width; x++){
                 int p = image.getRGB(x,y);
-                image.setRGB(x, y, rgb.to(p));
+                rgbImage.setRGB(x, y, rgb.to(p));
             }
         }
-        return image;
+        return rgbImage;
 	}	
 	
     public static void main(String args[])throws IOException{

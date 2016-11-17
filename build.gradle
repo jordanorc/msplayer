@@ -16,6 +16,9 @@ repositories {
     // Use 'jcenter' for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    maven {
+        url "https://raw.githubusercontent.com/lychie/maven-repo/master/snapshots/"
+    }
 }
 
 sourceSets {
@@ -34,6 +37,8 @@ dependencies {
     compile 'uk.co.caprica:vlcj:3.10.1'
     compile 'net.bramp.ffmpeg:ffmpeg:0.6'
     compile 'org.imgscalr:imgscalr-lib:4.2'
+    compile 'it.sauronsoftware:jave:1.0.2'
+    compile group: 'com.miglayout', name: 'miglayout', version: '3.7.4'
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the

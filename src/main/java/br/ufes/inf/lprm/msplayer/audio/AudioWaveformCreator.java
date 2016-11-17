@@ -1,4 +1,4 @@
-package br.ufes.inf.lprm.audio;
+package br.ufes.inf.lprm.msplayer.audio;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

@@ -8,14 +8,28 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
@@ -23,7 +37,11 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
+import javax.xml.transform.stream.StreamResult;
 
+import br.ufes.inf.lprm.msplayer.audio.AudioExtractor;
+import br.ufes.inf.lprm.msplayer.audio.AudioInfo;
+import br.ufes.inf.lprm.msplayer.audio.SilenceInfo;
 import br.ufes.inf.lprm.msplayer.video.utils.FrameExtractor;
 import uk.co.caprica.vlcj.binding.LibVlcConst;
 import uk.co.caprica.vlcj.filter.swing.SwingFileFilterFactory;
@@ -60,11 +78,11 @@ public class PlayerVideoControlsPanel extends JPanel {
 	private JButton captureButton;
 
 	private JButton ejectButton;
-	private JButton connectButton;
+	private JButton exportAudioButton;
 
 	private JButton fullScreenButton;
 
-	private JButton subTitlesButton;
+	private JButton exportXMLButton;
 
 	private JFileChooser fileChooser;
 
@@ -150,9 +168,9 @@ public class PlayerVideoControlsPanel extends JPanel {
 		ejectButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/control_eject_blue.png")));
 		ejectButton.setToolTipText("Load/eject media");
 
-		connectButton = new JButton();
-		connectButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/connect.png")));
-		connectButton.setToolTipText("Connect to media");
+		exportAudioButton = new JButton();
+		exportAudioButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/audio.png")));
+		exportAudioButton.setToolTipText("Connect to media");
 
 		fileChooser = new JFileChooser();
 		fileChooser.setApproveButtonText("Play");
@@ -167,9 +185,9 @@ public class PlayerVideoControlsPanel extends JPanel {
 		fullScreenButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/image.png")));
 		fullScreenButton.setToolTipText("Toggle full-screen");
 
-		subTitlesButton = new JButton();
-		subTitlesButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/comment.png")));
-		subTitlesButton.setToolTipText("Cycle sub-titles");
+		exportXMLButton = new JButton();
+		exportXMLButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/xml.png")));
+		exportXMLButton.setToolTipText("Cycle sub-titles");
 	}
 
 	private void layoutControls() {
@@ -209,11 +227,11 @@ public class PlayerVideoControlsPanel extends JPanel {
 		bottomPanel.add(captureButton);
 
 		bottomPanel.add(ejectButton);
-		bottomPanel.add(connectButton);
+		bottomPanel.add(exportAudioButton);
 
 		bottomPanel.add(fullScreenButton);
 
-		bottomPanel.add(subTitlesButton);
+		bottomPanel.add(exportXMLButton);
 
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
@@ -376,24 +394,23 @@ public class PlayerVideoControlsPanel extends JPanel {
 			}
 		});
 
-		connectButton.addActionListener(new ActionListener() {
+		exportAudioButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String mediaUrl = mediaPlayer.mrl();
-				FrameExtractor extractor = new FrameExtractor(mediaUrl);
-				// extractor.getFrames();
+				JFileChooser chooser = new JFileChooser();
 
-				extractor.getKeyFrames();
+				try {
+					String mediaUrl = mediaPlayer.mrl();
+					File audio = AudioExtractor.extract(new File(new URL(mediaUrl).toURI()));
+					chooser.showSaveDialog(null);					
+					Files.write(new File(chooser.getSelectedFile() + ".wave").toPath(), Files.readAllBytes(audio.toPath()), StandardOpenOption.CREATE);
+					JOptionPane.showMessageDialog(null, "Feito.");
 
-				// mediaPlayer.enableOverlay(false);
-				// String mediaUrl =
-				// JOptionPane.showInputDialog(PlayerControlsPanel.this, "Enter
-				// a media URL", "Connect to media",
-				// JOptionPane.QUESTION_MESSAGE);
-				// if(mediaUrl != null && mediaUrl.length() > 0) {
-				// mediaPlayer.playMedia(mediaUrl);
-				// }
-				// mediaPlayer.enableOverlay(true);
+				} catch (URISyntaxException | IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
 			}
 		});
 
@@ -404,19 +421,30 @@ public class PlayerVideoControlsPanel extends JPanel {
 			}
 		});
 
-		subTitlesButton.addActionListener(new ActionListener() {
+		exportXMLButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int spu = mediaPlayer.getSpu();
-				if (spu > -1) {
-					spu++;
-					if (spu > mediaPlayer.getSpuCount()) {
-						spu = -1;
-					}
-				} else {
-					spu = 0;
+				JFileChooser chooser = new JFileChooser();
+
+				try {
+					String mediaUrl = mediaPlayer.mrl();
+					FileInputStream audio;
+
+					audio = new FileInputStream(AudioExtractor.extract(new File(new URL(mediaUrl).toURI())));
+
+					AudioInfo info = new AudioInfo(AudioSystem.getAudioInputStream(new BufferedInputStream(audio)));
+					ArrayList<SilenceInfo> silenceInfo = info.findSilence(1, 8000);
+
+					chooser.showSaveDialog(null);
+					String xml = info.createXML(silenceInfo);
+					Files.write(new File(chooser.getSelectedFile() + ".xml").toPath(), xml.getBytes(), StandardOpenOption.CREATE);
+					JOptionPane.showMessageDialog(null, "Feito.");
+
+				} catch (URISyntaxException | UnsupportedAudioFileException | IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
-				mediaPlayer.setSpu(spu);
+
 			}
 		});
 	}

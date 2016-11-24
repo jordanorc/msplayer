@@ -82,7 +82,7 @@ public class PlayerAudioInfoPanel extends JPanel {
 					FileInputStream audio = new FileInputStream(
 							AudioExtractor.extract(new File(new URL(mediaUrl).toURI())));
 					AudioInfo info = new AudioInfo(AudioSystem.getAudioInputStream(new BufferedInputStream(audio)));
-					ArrayList<SilenceInfo> silenceInfo = info.findSilence(1, 8000);
+					ArrayList<SilenceInfo> silenceInfo = info.findSilence(0.5, 60);
 					populateTable(silenceInfo);
 				} catch (UnsupportedAudioFileException e) {
 					// TODO Auto-generated catch block

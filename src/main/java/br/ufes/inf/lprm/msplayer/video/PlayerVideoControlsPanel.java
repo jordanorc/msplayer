@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.ImageIcon;
@@ -39,9 +41,11 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import javax.xml.transform.stream.StreamResult;
 
+import br.ufes.inf.lprm.msplayer.Settings;
 import br.ufes.inf.lprm.msplayer.audio.AudioExtractor;
 import br.ufes.inf.lprm.msplayer.audio.AudioInfo;
 import br.ufes.inf.lprm.msplayer.audio.SilenceInfo;
+import br.ufes.inf.lprm.msplayer.image.ImageEditor;
 import br.ufes.inf.lprm.msplayer.video.utils.FrameExtractor;
 import uk.co.caprica.vlcj.binding.LibVlcConst;
 import uk.co.caprica.vlcj.filter.swing.SwingFileFilterFactory;
@@ -170,7 +174,7 @@ public class PlayerVideoControlsPanel extends JPanel {
 
 		exportAudioButton = new JButton();
 		exportAudioButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/audio.png")));
-		exportAudioButton.setToolTipText("Connect to media");
+		exportAudioButton.setToolTipText("Export audio");
 
 		fileChooser = new JFileChooser();
 		fileChooser.setApproveButtonText("Play");
@@ -187,7 +191,7 @@ public class PlayerVideoControlsPanel extends JPanel {
 
 		exportXMLButton = new JButton();
 		exportXMLButton.setIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/xml.png")));
-		exportXMLButton.setToolTipText("Cycle sub-titles");
+		exportXMLButton.setToolTipText("Export XML");
 	}
 
 	private void layoutControls() {
@@ -379,7 +383,9 @@ public class PlayerVideoControlsPanel extends JPanel {
 		captureButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mediaPlayer.saveSnapshot();
+				BufferedImage image = mediaPlayer.getSnapshot();
+				ImageEditor editor = new ImageEditor(image);
+				editor.setVisible(true);
 			}
 		});
 
@@ -402,15 +408,16 @@ public class PlayerVideoControlsPanel extends JPanel {
 				try {
 					String mediaUrl = mediaPlayer.mrl();
 					File audio = AudioExtractor.extract(new File(new URL(mediaUrl).toURI()));
-					chooser.showSaveDialog(null);					
-					Files.write(new File(chooser.getSelectedFile() + ".wave").toPath(), Files.readAllBytes(audio.toPath()), StandardOpenOption.CREATE);
+					chooser.showSaveDialog(null);
+					Files.write(new File(chooser.getSelectedFile() + ".wave").toPath(),
+							Files.readAllBytes(audio.toPath()), StandardOpenOption.CREATE);
 					JOptionPane.showMessageDialog(null, "Feito.");
 
 				} catch (URISyntaxException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				
+
 			}
 		});
 
@@ -437,7 +444,8 @@ public class PlayerVideoControlsPanel extends JPanel {
 
 					chooser.showSaveDialog(null);
 					String xml = info.createXML(silenceInfo);
-					Files.write(new File(chooser.getSelectedFile() + ".xml").toPath(), xml.getBytes(), StandardOpenOption.CREATE);
+					Files.write(new File(chooser.getSelectedFile() + ".xml").toPath(), xml.getBytes(),
+							StandardOpenOption.CREATE);
 					JOptionPane.showMessageDialog(null, "Feito.");
 
 				} catch (URISyntaxException | UnsupportedAudioFileException | IOException e1) {

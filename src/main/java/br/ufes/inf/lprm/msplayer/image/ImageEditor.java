@@ -27,6 +27,7 @@ public class ImageEditor extends JFrame {
 		getContentPane().add(new ImageControlsPanel(panel), BorderLayout.SOUTH);
 
 		setSize(650, 650);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 	
 	public void centerWindow() {

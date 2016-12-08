@@ -2,6 +2,8 @@ package br.ufes.inf.lprm.msplayer.video;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileFilter;
@@ -24,6 +26,7 @@ import org.imgscalr.Scalr;
 import org.imgscalr.Scalr.Method;
 
 import br.ufes.inf.lprm.msplayer.Settings;
+import br.ufes.inf.lprm.msplayer.image.ImageEditor;
 import br.ufes.inf.lprm.msplayer.video.utils.FrameExtractor;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -61,6 +64,16 @@ public class PlayerVideoFramePanel extends JScrollPane {
 				// thumb.setText(files[i].getName());
 				thumb.setBorder(new EmptyBorder(4, 4, 4, 4));
 				frames.add(i, thumb);
+				
+				thumb.addMouseListener(new MouseAdapter(){
+				    @Override
+				    public void mouseClicked(MouseEvent e){
+				        if(e.getClickCount()==2){
+				        	ImageEditor editor = new ImageEditor(img);
+				        	editor.setVisible(true);
+				        }
+				    }
+				});
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

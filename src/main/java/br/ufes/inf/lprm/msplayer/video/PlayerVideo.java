@@ -62,7 +62,7 @@ public class PlayerVideo extends JPanel {
 		videoSurface = new Canvas();
 
 		videoSurface.setBackground(Color.black);
-		videoSurface.setSize(800, 300);
+		videoSurface.setSize(800, 200);
 
 		JFrame topFrame = (JFrame) SwingUtilities.windowForComponent(this);
 		FullScreenStrategy fullScreenStrategy = new DefaultFullScreenStrategy(parent);
